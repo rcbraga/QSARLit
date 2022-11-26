@@ -51,7 +51,7 @@ import pickle
 
 sns.set_style("whitegrid")
 
-def app(df):
+def app(df,s_state):
     ########################################################################################################################################
     # Function Settings
     ########################################################################################################################################
@@ -236,11 +236,6 @@ def app(df):
 
     # Upload File
     #repeated code
-    with st.sidebar.header('1. Upload your CSV data'):
-        uploaded_file = st.sidebar.file_uploader("Upload your input CSV file", type=["csv"])
-    st.sidebar.markdown("""
-    [Example CSV input file](https://github.com/joseteofilo/data_qsarlit/blob/master/example_data_for_probability_maps.csv)
-    """)
 
 
     # Select columns
@@ -256,17 +251,6 @@ def app(df):
 
     # Read Uploaded file and convert to pandas
     #repeated code
-    if uploaded_file is not None:
-        # Read CSV data
-        df = pd.read_csv(uploaded_file, sep=',')
-        df =pd.DataFrame(df)
-        st.header('**Original input data**')
-
-        AgGrid(df)
-
-    else:
-        st.info('Awaiting for CSV file to be uploaded.')
-
     ########################################################################################################################################
     # Sidebar - Select descriptor
     ########################################################################################################################################
@@ -293,7 +277,7 @@ def app(df):
     # Select compound
     ########################################################################################################################################
     #repeated code
-    if uploaded_file is not None:
+    if df is not None:
         if no_compound_id: 
             ids=df.index
         elif column_id is not None:

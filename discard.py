@@ -56,3 +56,37 @@
 #         st.info('Awaiting for CSV file to be uploaded.')
 
 #     st.sidebar.write('---')
+  # n_estimator_container=st.sidebar.container()
+            # min_parameter_n_estimators = n_estimator_container.number_input('Minimal value of estimators (n_estimators)', 50,key="min_parameter_n_estimators", max_value=None, step=1)
+            # if "max_parameter_n_estimators" in s_state:
+            #     if s_state["max_parameter_n_estimators"] <= min_parameter_n_estimators:
+            #         s_state["max_parameter_n_estimators"] = min_parameter_n_estimators+1
+            #     else:
+            #         pass
+            #     max_parameter_n_estimators = n_estimator_container.number_input('Maximum value of estimators (n_estimators)', s_state["max_parameter_n_estimators"], key="max_parameter_n_estimators", max_value=None, step=1)
+            # else:
+            #     max_parameter_n_estimators = n_estimator_container.number_input('Maximum value of estimators (n_estimators)', min_parameter_n_estimators+1, key="max_parameter_n_estimators", max_value=None, step=1)
+            #     n_estimator_container.write("First value (minimum) must be smaller than second(maximum) value")
+#min_parameter_max_depth = st.sidebar.number_input('Minimum Max depth (max_depth)', 1, 200,key="min_parameter_max_depth")
+            # #ensure that the max depth is not smaller than the min depth
+            # if "max_parameter_max_depth" in s_state:
+            #     if s_state["max_parameter_max_depth"] <= min_parameter_max_depth:
+            #         s_state["max_parameter_max_depth"] = min_parameter_max_depth+1
+            #     else:
+            #         pass
+            #     max_parameter_max_depth = st.sidebar.number_input('Maximum Max depth (max_depth)', s_state["max_parameter_max_depth"], 200,key="max_parameter_max_depth")
+            # else:
+            #     max_parameter_max_depth = st.sidebar.number_input('Maximum Max depth (max_depth)', min_parameter_max_depth+1, 200,key="max_parameter_max_depth")
+            #     s_state["max_parameter_max_depth"] = max_parameter_max_depth
+
+            # max_depth = {"max_depth": [min_parameter_max_depth, max_parameter_max_depth]}
+            # selected_hyperparameters.update(max_depth)
+            # #st.write(selected_hyperparameters)
+            #min_parameter_min_samples_split = st.sidebar.number_input('Minimum number of samples required to split an internal node (min_samples_split)', 2, 50)
+            # max_parameter_min_samples_split = st.sidebar.number_input('Maximum number of samples required to split an internal node (min_samples_split)', min_parameter_min_samples_split+1, 50)
+            # min_samples_split = {'min_samples_split': [min_parameter_min_samples_split, max_parameter_min_samples_split]}
+            # selected_hyperparameters.update(min_samples_split)
+            #min_parameter_min_samples_leaf = st.sidebar.number_input('Minimum number of samples required to be at a leaf node (min_samples_leaf)', 1, 50)
+            # max_parameter_min_samples_leaf = st.sidebar.number_input('Maximum number of samples required to be at a leaf node (min_samples_leaf)', min_parameter_min_samples_leaf, 50)
+            # min_samples_leaf = {'min_samples_leaf': [min_parameter_min_samples_leaf,max_parameter_min_samples_leaf]}
+            # selected_hyperparameters.update(min_samples_leaf)

@@ -9,7 +9,7 @@ app = MultiApp()
 # Add all your application here
 app.add_app("Home", home.app)
 app.add_app("Curation for modeling", cur.app)
-#app.add_app("Curation for Virtual Screening", cur_vs.app)
+app.add_app("Curation for Virtual Screening", cur_vs.app)
 app.add_app("Calculate Descriptors", desc.app)
 app.add_app("Random Forest - Classification", rf.app)
 app.add_app("Support Vector Classification", svm.app)
@@ -23,24 +23,35 @@ cc = utils.Custom_Components()
 
 # The main app
 s_state = st.session_state
+#st.write(s_state)
+not_modeling = ["Curation for modeling","Curation for Virtual Screening","Calculate Descriptors","Probability Maps","Virtual Screening"]
 if 'title' not in s_state:
     s_state["title"] = {"title":'Home',"function":home.app}
     s_title = s_state["title"]["title"]
-    st.write(s_state)
+    #st.write(s_state)
     if s_title == 'Home':
         s_state.df = None
         app.run(None,s_state)
-    else:
+    elif s_title in not_modeling:
         #s_state = st.session_state
         s_state.df = cc.upload_file()
         app.run(s_state.df,s_state)
+    else:
+        s_state.df = cc.upload_file(custom_title="Upload your dataset for modeling")
+        #cc.delete_column(s_state.df,s_title)	
+        app.run(s_state.df,s_state)
 else:
-        st.write(s_state)
+        #st.write(s_state)
         s_title = s_state["title"]["title"]
         if s_title == 'Home':
             s_state.df = None
             app.run(None,s_state)
-        else:
+        elif s_title in not_modeling:
             #s_state = st.session_state
             s_state.df = cc.upload_file()
+            app.run(s_state.df,s_state)
+        else:
+            s_state.df = cc.upload_file(custom_title="Upload your dataset for modeling")
+            #st.write(s_state)
+            #cc.delete_column(s_state.df,s_title)
             app.run(s_state.df,s_state)

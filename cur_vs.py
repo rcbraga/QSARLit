@@ -30,8 +30,8 @@ from rdkit import Chem
 from rdkit.Chem.MolStandardize import rdMolStandardize
 
 from st_aggrid import AgGrid
-
-def app(df):
+import utils
+def app(df,s_state):
 
     ########################################################################################################################################
     # Functions
@@ -157,7 +157,7 @@ def app(df):
                 'Select column containing Activity (Active and Inactive should be 1 and 0, respectively or numerical values)', 
                 options=df.columns, key="outcome_column"
                 )
-            curate = cur.Curation(name_smiles)
+            curate = utils.Curation(name_smiles)
         ########################################################################################################################################
         # Sidebar - Select visual inspection
         ########################################################################################################################################
@@ -191,7 +191,7 @@ def app(df):
 
             #---------------------------------------------------------------------------------#
             # Remove compounds with metals
-            remove_metals(df)
+            curate.remove_metals(df)
 
             #---------------------------------------------------------------------------------#
             # Normalize groups
@@ -200,7 +200,7 @@ def app(df):
 
                 st.header('**Normalized Groups**')
 
-                normalized = normalize_groups(df)
+                normalized = curate.normalize_groups(df)
 
                 #Generate Image from original SMILES
                 PandasTools.AddMoleculeColumnToFrame(normalized, smilesCol=name_smiles,
@@ -214,7 +214,7 @@ def app(df):
                 st.write(normalized_fig.to_html(escape=False), unsafe_allow_html=True)
 
             else:
-                normalized = normalize_groups(df)
+                normalized = curate.normalize_groups(df)
                 #redundante?
             #----------------------------------------------------------------------------------#
             # Neutralize when possible
@@ -222,7 +222,7 @@ def app(df):
 
                 st.header('**Neutralized Groups**')
                 #if options[0] in selected_options:
-                neutralized = neutralize(normalized)
+                neutralized = curate.neutralize(normalized)
                 # else:
                 #     neutralized=neutralize(df)
                 #Generate Image from normalized SMILES
@@ -237,7 +237,7 @@ def app(df):
                 st.write(neutralized_fig.to_html(escape=False), unsafe_allow_html=True)
 
             else:
-                neutralized = neutralize(normalized)
+                neutralized = curate.neutralize(normalized)
 
             #---------------------------------------------------------------------------------#
             # Remove mixtures and salts
@@ -245,7 +245,7 @@ def app(df):
 
                 st.header('**Remove mixtures**')
                 # if options[1] in selected_options:
-                no_mixture = no_mixture(neutralized)
+                no_mixture = curate.no_mixture(neutralized)
             
                 #Generate Image from Neutralized SMILES
                 PandasTools.AddMoleculeColumnToFrame(no_mixture, smilesCol="neutralized_smiles",
@@ -258,7 +258,7 @@ def app(df):
                 # Show table for comparing
                 st.write(no_mixture_fig.to_html(escape=False), unsafe_allow_html=True)
             else:
-                no_mixture = no_mixture(neutralized)
+                no_mixture = curate.no_mixture(neutralized)
 
             #---------------------------------------------------------------------------------#
 
@@ -267,7 +267,7 @@ def app(df):
 
                 st.header('**Generate canonical tautomers**')
                 # if options[2] in selected_options:
-                canonical_tautomer = canonical_tautomer(no_mixture)
+                canonical_tautomer = curate.canonical_tautomer(no_mixture)
                 #Generate Image from Neutralized SMILES
                 PandasTools.AddMoleculeColumnToFrame(canonical_tautomer, smilesCol="no_mixture_smiles",
                 molCol="No_mixture", includeFingerprints=False)
@@ -280,7 +280,7 @@ def app(df):
                 st.write(canonical_tautomer_fig.to_html(escape=False), unsafe_allow_html=True)
 
             else:
-                canonical_tautomer = canonical_tautomer(no_mixture)
+                canonical_tautomer = curate.canonical_tautomer(no_mixture)
 
         ########################################################################################################################################
         # Analysis of duplicates
@@ -291,7 +291,7 @@ def app(df):
         
         #--------------------------- Removal of duplicates------------------------------#
             # Generate InchiKey
-            inchikey = smi_to_inchikey(canonical_tautomer)
+            inchikey = curate.smi_to_inchikey(canonical_tautomer)
 
             no_dup = inchikey.drop_duplicates(subset='inchikey', keep="first")
 

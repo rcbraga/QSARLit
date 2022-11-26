@@ -34,7 +34,7 @@ from io import BytesIO
 from PIL import Image
 
 
-"""def deploy_chembl():
+def deploy_chembl():
     import os,subprocess
     import sys
     files = os.listdir()
@@ -55,55 +55,35 @@ from PIL import Image
                 if chbl.returncode != 0:
                     st.error("Error installing ChEMBL_Structure_Pipeline. Please try again.")
                 else: st.write('ChEMBL_Structure_Pipeline installed')
-    else: pass"""
-def persist_dataframe(df,updated_df,col_to_delete):
+    else: pass
+def persist_dataframe(df,updated_df_key,col_to_delete):
             # drop column from dataframe
             delete_col = st.session_state[col_to_delete]
 
-            if delete_col in st.session_state[updated_df]:
-                st.session_state[updated_df] = st.session_state[updated_df].drop(columns=[delete_col])
+            if delete_col in st.session_state[updated_df_key]:
+                st.session_state[updated_df_key] = st.session_state[updated_df_key].drop(columns=[delete_col])
             else:
                 st.sidebar.warning("Column previously deleted. Select another column.")
             with st.container():
                 st.header("**Updated input data**") 
-                AgGrid(st.session_state[updated_df])
+                AgGrid(st.session_state[updated_df_key])
                 st.header('**Original input data**')
                 AgGrid(df)
 def check_if_name_in_column(df: pd.DataFrame, name):
         if name in df.columns:
-            return True
+            pass
         else:
-            return False
+            st.sidebar.error('Please enter a valid column name')
+            st.stop()
+            #return False
 class Commons:
-    def __init__(self) -> None:
+    def __init__(self,s_state = None) -> None:
         pass
 
-    def persist_dataframe(self,df,updated_df,col_to_delete):
-            # drop column from dataframe
-            delete_col = st.session_state[col_to_delete]
-
-            if delete_col in st.session_state[updated_df]:
-                st.session_state[updated_df] = st.session_state[updated_df].drop(columns=[delete_col])
-            else:
-                st.sidebar.warning("Column previously deleted. Select another column.")
-            with st.container():
-                st.header("**Updated input data**") 
-                AgGrid(st.session_state[updated_df])
-                st.header('**Original input data**')
-                AgGrid(df)
-
-    def filedownload(self,df,data):
-            csv = df.to_csv(index=False)
-            b64 = base64.b64encode(csv.encode()).decode()  # strings <-> bytes conversions
-            st.header(f"**Download {data} data**")
-            href = f'<a href="data:file/csv;base64,{b64}" download="{data}_data.csv">Download CSV File</a>'
-            st.markdown(href, unsafe_allow_html=True)
-    
-class Custom_Components:
+class Custom_Components():
     
     def __init__(self) -> None:
-        return None
-    
+        pass
     def AgGrid(self,df,key = None,Table_title="Input data"):
         gd = GridOptionsBuilder.from_dataframe(df)
         gd.configure_pagination(enabled=True)
@@ -112,19 +92,40 @@ class Custom_Components:
         gd = gd.build()
         st.header(f"**{Table_title}**")
         AgGrid(df,key = key,height=500,width=800,gridOptions=gd,columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS)
-        
+    
+    def filedownload(self,df,data):
+            csv = df.to_csv(index=False)
+            b64 = base64.b64encode(csv.encode()).decode()  # strings <-> bytes conversions
+            st.header(f"**Download {data} data**")
+            href = f'<a href="data:file/csv;base64,{b64}" download="{data}_data.csv">Download CSV File</a>'
+            st.markdown(href, unsafe_allow_html=True)
+    
+    def min_n_max_number_input(self,label,step = 1,min_value = 0,max_value = 1000,key = [None,None],context : st = st.sidebar):
+        c = context
+        MIN = c.number_input(f"Minimum {label}",step = step,min_value = min_value,max_value = max_value, key = key[0])
+        if key[1] in st.session_state:
+            if st.session_state[key[1]] <= st.session_state[key[0]]:
+                st.session_state[key[1]] = st.session_state[key[0]]+1
+            else:
+                pass
+            MAX = c.number_input(f"Maximum {label}",step = step,min_value = st.session_state[key[1]],max_value = max_value, key = key[1])
+            return MIN,MAX
+        else:
+            MAX = c.number_input(f"Maximum {label}",step = step,min_value = st.session_state[key[0]]+1,max_value = max_value, key = key[1])
+            return MIN,MAX
+    
     def upload_file(self,custom_title = "Upload file",context:st=None,file_type = "csv",key = "")->pd.DataFrame:
         if st.session_state["title"]["title"] != "Home":
             
             if not context:
-                st.header(f"**{custom_title}**")
+                st.subheader(f"{custom_title}")
                 uploaded_file = st.file_uploader("Choose a file", type=["csv","xlsx"],key = "uploader"+key)
                 
                 st.markdown("""
                 [Example CSV input file](https://github.com/joseteofilo/data_qsarlit/blob/master/example_modeling_dataset_for_curation.csv)
-                """)
+                    """)
             else:
-                context.header(f"**{custom_title}**")
+                context.subheader(f"{custom_title}")
                 uploaded_file = context.file_uploader("Choose a file", type=["csv","xlsx"],key = "uploader"+"_"+key)
                 
                 context.markdown("""
@@ -202,30 +203,51 @@ class Custom_Components:
         st.header(f"**{data}**")
         AgGrid(df, width = 800, gridOptions = gd, allow_unsafe_jscode = True, columns_auto_size_mode = ColumnsAutoSizeMode.FIT_CONTENTS)
 
-    def delete_column(self,df):
+    def persist_df_through_deletion(self,df, updated_df_key, col_to_delete_key):
+            # drop column from dataframe
+            s_state = st.session_state
+            delete_col = s_state[col_to_delete_key]
+            if delete_col in s_state[updated_df_key].columns:
+                droped = s_state[updated_df_key].drop(columns=[delete_col])
+                if "input" in s_state:
+                    #s_state.pop("input")
+                    #st.header("**Updated input data**") 
+                    st.info("Deleted col "+delete_col)
+                    self.AgGrid(df=droped,Table_title="Updated input data")
+                return droped
+
+            else:
+                st.sidebar.warning("Column previously deleted. Select another column.")
+            #s_state.df = droped
+            #     st.header('**Original input data**')
+            #     self.AgGrid(df=df,Table_title="Original input data")
+
+    def delete_column(self,df,title):
         if df is not None:
         # Read CSV data
         #df = pd.read_csv(uploaded_file, sep=',')
-
-            if "updated_df" not in st.session_state:
-                st.session_state.updated_df = df
             
-                st.header('**Original input data**')
-                AgGrid(df)
-            else:
-                AgGrid(df)
-            st.sidebar.header("Please delete undesired columns")
+            if "updated_df_key" not in st.session_state:
+                st.session_state["updated_df_key"] = df
+                #sst.header('**Original input data**')
+                #self.AgGrid(df,key="original_df",Table_title="Original input data")
             
-            with st.sidebar.form("my_form"):
+                #self.AgGrid(df,key="original_df",Table_title="Original input data")
+            #st.subheader(f"{title}")
+            
+            with st.form(key=f"delete_columns",clear_on_submit=True):
                 index = df.columns.tolist().index(
-                    st.session_state["updated_df"].columns.tolist()[0]
+                    st.session_state["updated_df_key"].columns.tolist()[0]
                 )
                 st.selectbox(
                     "Select column to delete", options=df.columns, index=index, key="delete_col"
                 )
                 delete = st.form_submit_button(label="Delete")
             if delete:
-                persist_dataframe("updated_df","delete_col")
+                #st.write(st.session_state)
+                with st.container():
+                    droped = self.persist_df_through_deletion(df,"updated_df_key","delete_col")
+                    st.session_state["df"] = droped
 
     def ReadPictureFiles(self,wch_fl) -> base64:
         try:
