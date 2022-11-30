@@ -1,2 +1,2 @@
 #ignore .pyc files
-./pycache/*.pyc
+./pycache/*
