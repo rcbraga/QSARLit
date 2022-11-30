@@ -24,7 +24,7 @@ cc = utils.Custom_Components()
 # The main app
 s_state = st.session_state
 #st.write(s_state)
-not_modeling = ["Curation for modeling","Curation for Virtual Screening","Calculate Descriptors","Probability Maps","Virtual Screening"]
+not_modeling = ["Curation for modeling","Curation for Virtual Screening","Calculate Descriptors","Probability Maps"]
 if 'title' not in s_state:
     s_state["title"] = {"title":'Home',"function":home.app}
     s_title = s_state["title"]["title"]

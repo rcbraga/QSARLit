@@ -38,7 +38,7 @@ import pickle
 
 from rdkit.Chem.Draw import DrawingOptions
 
-
+import utils
 ########################################################################################################################################
 # Page Title
 ########################################################################################################################################
@@ -55,6 +55,7 @@ def app(df,s_state):
     # Functions
     ########################################################################################################################################
     #repeated code
+    cc = utils.Custom_Components()
     def filedownload(df):
             csv = df.to_csv(index=False)
             b64 = base64.b64encode(csv.encode()).decode()  # strings <-> bytes conversions
@@ -98,46 +99,47 @@ def app(df,s_state):
 
     # Upload File for predictions
     #repeated code
-    with st.sidebar.header('1. Upload your CSV of modeling data (AD calculation)'):
-        uploaded_file = st.sidebar.file_uploader("Upload your CSV data for predictions", type=["csv"], key="up_CSV_VS")
-    st.sidebar.markdown("[Example CSV input file](%s)"% info["Links"][0])
+    
+    # with st.sidebar.header('1. Upload your CSV of modeling data (AD calculation)'):
+    #     uploaded_file = st.sidebar.file_uploader("Upload your CSV data for predictions", type=["csv"], key="up_CSV_VS")
+    # st.sidebar.markdown("[Example CSV input file](%s)"% info["Links"][0])
     #repeated code
-    if uploaded_file is not None:
+    if df is not None:
         # Read CSV data
-        df = pd.read_csv(uploaded_file, sep=',')
+        #f = pd.read_csv(uploaded_file, sep=',')
+        cc.delete_column(df)
+    #     if "updated_df" not in st.session_state:
+    #         st.session_state.updated_df = df
+    #         index_csv=0
+    #         st.header('**Original input data**')
+    #         st.write(df)
         
-        if "updated_df" not in st.session_state:
-            st.session_state.updated_df = df
-            index_csv=0
-            st.header('**Original input data**')
-            st.write(df)
-        
-        st.sidebar.header("Please delete columns not related to descriptor!")
-        if "updated_df" in st.session_state:
-            with st.sidebar.form("descriptor_form"):
-                if len(st.session_state["updated_df"].columns.tolist())>0:
-                    for i in range(len(st.session_state["updated_df"].columns.tolist())):
-                        if i is not None:
-                            index_csv=i
-                            break
-                    index = df.columns.tolist().index(
-                    st.session_state["updated_df"].columns.tolist()[index_csv]
-                )
-                st.selectbox(
-                    "Select column to delete", options=df.columns, index=index, key="delete_col"
-                )
-                delete = st.form_submit_button(label="Delete")
-            if delete:
-                # Persist dataframe and show it inside an expander
-                if "updated_modeling_df" in st.session_state:
-                    # show Both if user inputs first df
-                    with st.expander("Modeling"):
-                        st.write(st.session_state.updated_modeling_df,key="inside_org_csv_expander")
-                    saveDFs(df,"Predictions","updated_df","delete_col")
-                else:
-                    saveDFs(df,"Predictions","updated_df","delete_col")
-    else:
-        st.info(info["CSV"])
+    #     st.sidebar.header("Please delete columns not related to descriptor!")
+    #     if "updated_df" in st.session_state:
+    #         with st.sidebar.form("descriptor_form"):
+    #             if len(st.session_state["updated_df"].columns.tolist())>0:
+    #                 for i in range(len(st.session_state["updated_df"].columns.tolist())):
+    #                     if i is not None:
+    #                         index_csv=i
+    #                         break
+    #                 index = df.columns.tolist().index(
+    #                 st.session_state["updated_df"].columns.tolist()[index_csv]
+    #             )
+    #             st.selectbox(
+    #                 "Select column to delete", options=df.columns, index=index, key="delete_col"
+    #             )
+    #             delete = st.form_submit_button(label="Delete")
+    #         if delete:
+    #             # Persist dataframe and show it inside an expander
+    #             if "updated_modeling_df" in st.session_state:
+    #                 # show Both if user inputs first df
+    #                 with st.expander("Modeling"):
+    #                     st.write(st.session_state.updated_modeling_df,key="inside_org_csv_expander")
+    #                 saveDFs(df,"Predictions","updated_df","Sdelete_col")
+    #             else:
+    #                 saveDFs(df,"Predictions","updated_df","delete_col")
+    # else:
+    #     st.info("Awaiting for CSV file to be uploaded.")
   
     #-----------------------------------------------------------------------------------------------------#
 
@@ -149,22 +151,22 @@ def app(df,s_state):
 
     # Upload File for predictions
     # repeated code
-    with st.sidebar.header('2. Upload your CSV for predictions '):
-        uploaded_file_modeling = st.sidebar.file_uploader("Upload your input CSV of modeling data (AD calculation)", type=["csv"], key="up_AD_VS")
+    #with st.sidebar.header('2. Upload your CSV for predictions '):
+    uploaded_file_modeling = cc.upload_file(custom_title="Upload your input CSV of modeling data (AD calculation)", context=st.sidebar, key="up_AD_VS")
+    cc.delete_column(df,key="upload_file_modeling")
+    #st.sidebar.markdown("[Example CSV input file](%s)"% info["Links"][1])
     
-    st.sidebar.markdown("[Example CSV input file](%s)"% info["Links"][1])
-    
-    with st.sidebar.container():
-        st.sidebar.header("Please delete columns not related to descriptor!")
-        """with st.sidebar.expander("If you want to see your MOLECULES"):
-            st.write(info["Modeling"][1])
-        name_smiles_vs = st.sidebar.text_input('Enter column name with SMILES', 'SMILES')
-        save_smiles=st.sidebar.button("Save Smiles")"""
+    # with st.sidebar.container():
+    #     st.sidebar.header("Please delete columns not related to descriptor!")
+    """with st.sidebar.expander("If you want to see your MOLECULES"):
+        st.write(info["Modeling"][1])
+    name_smiles_vs = st.sidebar.text_input('Enter column name with SMILES', 'SMILES')
+    save_smiles=st.sidebar.button("Save Smiles")"""
     #repeated code
     if  uploaded_file_modeling is not None:
         # Read CSV data
         df_modeling = pd.read_csv(uploaded_file_modeling, sep=',')
-        original_model=df_modeling.copy()
+        original_model = df_modeling.copy()
         
         """if save_smiles:
             
@@ -173,50 +175,50 @@ def app(df,s_state):
             smiles_column=pd.Series(df_modeling[name_smiles_vs]) 
             st.write(smiles_column)
         """
-        if "updated_modeling_df" not in st.session_state:
-            st.session_state.updated_modeling_df = df_modeling
-            index_modeling=0   
-            if uploaded_file is not None and "updated_df" not in st.session_state:
-                st.session_state.updated_df = df
-            if "updated_df" in st.session_state:
-                st.session_state.updated_df = st.session_state.updated_df
-                with st.expander("Prediction"):
-                    st.write(st.session_state.updated_df)
+        # if "updated_modeling_df" not in st.session_state:
+        #     st.session_state.updated_modeling_df = df_modeling
+        #     index_modeling=0   
+        #     if df is not None and "updated_df" not in st.session_state:
+        #         st.session_state.updated_df = df
+        #     if "updated_df" in st.session_state:
+        #         st.session_state.updated_df = st.session_state.updated_df
+        #         with st.expander("Prediction"):
+        #             st.write(st.session_state.updated_df)
             
-            st.header('**Original input data**')
-            st.write(df_modeling)
+        #     st.header('**Original input data**')
+        #     st.write(df_modeling)
             
         # If the modeling df is in session state compute rest
         
-        if "updated_modeling_df" in st.session_state:
-            if st.session_state.updated_modeling_df.columns.tolist() not in df_modeling.columns.tolist():
-                st.write(df_modeling,key="test")
-            with st.sidebar.form("modeling_form"):
-                    if len(st.session_state.updated_modeling_df.columns.tolist())>0:
-                        for i in range(len(st.session_state.updated_modeling_df.columns.tolist())):
-                            if i is not None:
-                                index_modeling=i
-                                break
-                        try:
-                            modeling_index = df_modeling.columns.tolist().index(
-                            st.session_state.updated_modeling_df.columns.tolist()[index_modeling]
-                            )
-                        except ValueError:
-                            modeling_index = df_modeling.columns.tolist().index(
-                            df_modeling.columns.tolist()[0]
-                            )
-                    st.selectbox("Select column to delete", options=st.session_state.updated_modeling_df.columns, index=modeling_index, key="delete_modeling_col")
-                    delete_modeling = st.form_submit_button(label="Delete")
-            if delete_modeling:
-                if "updated_df" in st.session_state:
-                    # show Both if user inputs first df
-                    with st.expander("Predictions"):
-                        st.write(st.session_state.updated_df,key="inside_modeling_expander")
-                    saveDFs(df_modeling,"Modeling","updated_modeling_df","delete_modeling_col")
-                else:
-                    saveDFs(df_modeling ,"Modeling","updated_modeling_df","delete_modeling_col")
-    else:
-        st.info(info["Modeling"][0])
+    #     if "updated_modeling_df" in st.session_state:
+    #         if st.session_state.updated_modeling_df.columns.tolist() not in df_modeling.columns.tolist():
+    #             st.write(df_modeling,key="test")
+    #         with st.sidebar.form("modeling_form"):
+    #                 if len(st.session_state.updated_modeling_df.columns.tolist())>0:
+    #                     for i in range(len(st.session_state.updated_modeling_df.columns.tolist())):
+    #                         if i is not None:
+    #                             index_modeling=i
+    #                             break
+    #                     try:
+    #                         modeling_index = df_modeling.columns.tolist().index(
+    #                         st.session_state.updated_modeling_df.columns.tolist()[index_modeling]
+    #                         )
+    #                     except ValueError:
+    #                         modeling_index = df_modeling.columns.tolist().index(
+    #                         df_modeling.columns.tolist()[0]
+    #                         )
+    #                 st.selectbox("Select column to delete", options=st.session_state.updated_modeling_df.columns, index=modeling_index, key="delete_modeling_col")
+    #                 delete_modeling = st.form_submit_button(label="Delete")
+    #         if delete_modeling:
+    #             if "updated_df" in st.session_state:
+    #                 # show Both if user inputs first df
+    #                 with st.expander("Predictions"):
+    #                     st.write(st.session_state.updated_df,key="inside_modeling_expander")
+    #                 saveDFs(df_modeling,"Modeling","updated_modeling_df","delete_modeling_col")
+    #             else:
+    #                 saveDFs(df_modeling ,"Modeling","updated_modeling_df","delete_modeling_col")
+    # else:
+    #     st.info(info["Modeling"][0])
   
    
     ########################################################################################################################################
@@ -249,9 +251,9 @@ def app(df,s_state):
     def predict():
         
         #original_df=original_model
-        to_delete=st.session_state.updated_modeling_df.columns
+        to_delete = st.session_state.updated_modeling_df.columns
         #print(to_delete)
-        deleted_col=original_model.drop(to_delete,axis=1)
+        deleted_col = original_model.drop(to_delete,axis=1)
 
         model = load_model(model_file)
         prediction = model.predict_proba(st.session_state.updated_modeling_df)

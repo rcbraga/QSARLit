@@ -203,7 +203,7 @@ class Custom_Components():
         st.header(f"**{data}**")
         AgGrid(df, width = 800, gridOptions = gd, allow_unsafe_jscode = True, columns_auto_size_mode = ColumnsAutoSizeMode.FIT_CONTENTS)
 
-    def persist_df_through_deletion(self,df, updated_df_key, col_to_delete_key):
+    def persist_df_through_deletion(self,df, updated_df_key, col_to_delete_key) -> pd.DataFrame:
             # drop column from dataframe
             s_state = st.session_state
             delete_col = s_state[col_to_delete_key]
@@ -222,32 +222,32 @@ class Custom_Components():
             #     st.header('**Original input data**')
             #     self.AgGrid(df=df,Table_title="Original input data")
 
-    def delete_column(self,df,title):
+    def delete_column(self,df,key = ""):
         if df is not None:
         # Read CSV data
         #df = pd.read_csv(uploaded_file, sep=',')
-            
-            if "updated_df_key" not in st.session_state:
-                st.session_state["updated_df_key"] = df
+            key = "updated_df"+key
+            if key not in st.session_state:
+                st.session_state[key] = df
                 #sst.header('**Original input data**')
                 #self.AgGrid(df,key="original_df",Table_title="Original input data")
             
                 #self.AgGrid(df,key="original_df",Table_title="Original input data")
             #st.subheader(f"{title}")
             
-            with st.form(key=f"delete_columns",clear_on_submit=True):
+            with st.form(key=f"delete_columns{key}",clear_on_submit=True):
                 index = df.columns.tolist().index(
-                    st.session_state["updated_df_key"].columns.tolist()[0]
+                    st.session_state[key].columns.tolist()[0]
                 )
                 st.selectbox(
-                    "Select column to delete", options=df.columns, index=index, key="delete_col"
+                    "Select column to delete", options=df.columns, index=index, key=f"delete_col{key}"
                 )
                 delete = st.form_submit_button(label="Delete")
             if delete:
                 #st.write(st.session_state)
                 with st.container():
-                    droped = self.persist_df_through_deletion(df,"updated_df_key","delete_col")
-                    st.session_state["df"] = droped
+                    droped = self.persist_df_through_deletion(df,key,f"delete_col{key}")
+                    #st.session_state["df"] = droped
 
     def ReadPictureFiles(self,wch_fl) -> base64:
         try:
