@@ -1,2 +1,5 @@
 #ignore .pyc files
-./pycache/*
+/*.csv
+__pycache__/
+imgs/
+t.py

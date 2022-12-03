@@ -90,3 +90,13 @@
             # max_parameter_min_samples_leaf = st.sidebar.number_input('Maximum number of samples required to be at a leaf node (min_samples_leaf)', min_parameter_min_samples_leaf, 50)
             # min_samples_leaf = {'min_samples_leaf': [min_parameter_min_samples_leaf,max_parameter_min_samples_leaf]}
             # selected_hyperparameters.update(min_samples_leaf)
+            # #Generate Image from Neutralized SMILES
+                # PandasTools.AddMoleculeColumnToFrame(not_canon, smilesCol = curate.curated_smiles,
+                # molCol = "No_mixture", includeFingerprints = False)
+                # #Generate Image from No_mixture SMILES
+                # PandasTools.AddMoleculeColumnToFrame(canonical_tautomer, smilesCol=curate.curated_smiles,
+                # molCol = "Canonical_tautomer", includeFingerprints = False)
+                # # Filter only columns containing images
+                # canonical_tautomer_fig = canonical_tautomer.filter(items = ["No_mixture", "Canonical_tautomer"])
+                # # Show table for comparing
+                # st.write(canonical_tautomer_fig.to_html(escape = False), unsafe_allow_html = True)

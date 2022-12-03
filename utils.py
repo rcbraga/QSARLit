@@ -56,6 +56,7 @@ def deploy_chembl():
                     st.error("Error installing ChEMBL_Structure_Pipeline. Please try again.")
                 else: st.write('ChEMBL_Structure_Pipeline installed')
     else: pass
+
 def persist_dataframe(df,updated_df_key,col_to_delete):
             # drop column from dataframe
             delete_col = st.session_state[col_to_delete]
@@ -69,6 +70,7 @@ def persist_dataframe(df,updated_df_key,col_to_delete):
                 AgGrid(st.session_state[updated_df_key])
                 st.header('**Original input data**')
                 AgGrid(df)
+
 def check_if_name_in_column(df: pd.DataFrame, name):
         if name in df.columns:
             pass
@@ -79,8 +81,7 @@ def check_if_name_in_column(df: pd.DataFrame, name):
 class Commons:
     def __init__(self,s_state = None) -> None:
         pass
-
-class Custom_Components():
+class Custom_Components:
     
     def __init__(self) -> None:
         pass
@@ -165,22 +166,24 @@ class Custom_Components():
             
         return img_tag
 
-    def img_AgGrid(self,df,mol_col,data = "Input"):
+    def img_AgGrid(self,df,mol_col,title = "Input",key = None):
         ShowImage = JsCode(
             """function (params) {
                     var element = document.createElement("span");
                     var imageElement = document.createElement("img");
-                    document.querySelectorAll('[role="row"]').forEach(function (x){
-                    x.style["height"] = "150px";
-                    });
-                    document.querySelectorAll('[role="gridcell"]').forEach(function (x){
-                    x.style["height"] = "150px";
-                    });
+                    
+                    //document.querySelectorAll('[role="row"]').forEach(function (x){
+                    //x.style["height"] = "150px";
+                    //});
+                    //document.querySelectorAll('[role="gridcell"]').forEach(function (x){
+                    //x.style["height"] = "150";
+                    //});
+
                     if (params.data.MOLECULE != '') {
                         imageElement.src = params.data.MOLECULE;
                         
-                        imageElement.width = 49;
-                        imageElement.height = 49;
+                        imageElement.width = 100;
+                        imageElement.height = 100;
                     } 
                     else { imageElement.src = ""; }
                     element.appendChild(imageElement);
@@ -189,19 +192,19 @@ class Custom_Components():
                     }"""
             )
         mols = [Chem.MolFromSmiles(x) for x in df[mol_col]]
-        imgs = [Draw.MolToImage(mol,size=(50,50)) for mol in mols]
+        imgs = [Draw.MolToImage(mol,size=(100,100)) for mol in mols]
         df["MOLECULE"] = self.img_tag_generator(imgs)
         gd = GridOptionsBuilder.from_dataframe(df)
         gd.configure_column("MOLECULE", cellRenderer = ShowImage)
-        gd.configure_auto_height()
         gd.configure_pagination(enabled = True,paginationAutoPageSize = False, paginationPageSize = 10)
         gd.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=False)
         gd.configure_selection('multiple', use_checkbox=True)
+        gd.configure_grid_options(rowHeight=100)
         gd.configure_column("MOLECULE", cellRenderer = ShowImage)
         
         gd = gd.build()
-        st.header(f"**{data}**")
-        AgGrid(df, width = 800, gridOptions = gd, allow_unsafe_jscode = True, columns_auto_size_mode = ColumnsAutoSizeMode.FIT_CONTENTS)
+        st.header(f"**{title}**")
+        AgGrid(df, width = 800,height=500 ,gridOptions = gd, key=f"IMG_{key}" ,allow_unsafe_jscode = True, columns_auto_size_mode = ColumnsAutoSizeMode.FIT_CONTENTS)
 
     def persist_df_through_deletion(self,df, updated_df_key, col_to_delete_key) -> pd.DataFrame:
             # drop column from dataframe
@@ -248,7 +251,6 @@ class Custom_Components():
                 with st.container():
                     droped = self.persist_df_through_deletion(df,key,f"delete_col{key}")
                     #st.session_state["df"] = droped
-
     def ReadPictureFiles(self,wch_fl) -> base64:
         try:
             return base64.b64encode(open(wch_fl, 'rb').read()).decode()
@@ -294,7 +296,6 @@ class Custom_Components():
         gb.configure_column(img_col, cellRenderer = ShowImage)
         vgo = gb.build()
         return AgGrid(df, gridOptions = vgo, height = 150, allow_unsafe_jscode = True )
-    
 class Continuous_Duplicate_Remover:
     def __init__(self,df: pd.DataFrame ,duplicate_col: str,value_col: str,convert_to_p: bool,convert_to_mol: bool) :
         self.df = df
@@ -418,7 +419,6 @@ class Continuous_Duplicate_Remover:
         dups = len(values) - len(dict_rows.keys())
         #tl = len(dict_rows.keys())
         return df,dups #,tl
-    
 class Classification_Duplicate_Remover:
 
     duplicate_stereo = "InChIKey"
@@ -455,7 +455,7 @@ class Classification_Duplicate_Remover:
                 return True
         return False
 
-    bigger = lambda _,x,y : x if x > y else y
+    bigger = lambda self,x,y : x if x > y else y
     #smaller = lambda x,y: x if x < y else y
     
     def binary_scorer(self, iterable, positive, negative):
@@ -516,7 +516,7 @@ class Classification_Duplicate_Remover:
         #print(df.iloc[1,-1])
         for key,value in dict_rows.items():
             #separate cepas from ames            
-
+            #row = df.loc[df[name_col] == key].values.flatten().tolist()
             if len(value) > 1:
                 discordance,_,positive_num,negative_num = self.binary_scorer(value,pos,neg)
                 if discordance < 0.3:
@@ -530,11 +530,11 @@ class Classification_Duplicate_Remover:
                             dict_rows[key] = 1
                         else:
                             dict_rows[key] = 0
+            
             df.loc[df[name_col] == key, value_cols] = dict_rows[key]
 
         dups = len(names) - len(dict_rows.keys())
         return df,dups
-
 class Curation:
     
     def __init__(self,smiles):
@@ -546,10 +546,25 @@ class Curation:
             smiles =  self.smiles
             curated_smiles = self.curated_smiles
         else:
-            smiles = smiles
+            #smiles = smiles
             curated_smiles = f'curated_{smiles}'
         return curated_smiles, smiles
         """ This function checks if a smile is passed """
+    
+    def remove_invalid_smiles(self,df:pd.DataFrame,smiles=None):
+        _, smiles = self.is_smiles_passed(smiles)
+        #df = pd.read_csv(smiles)
+        removed=[]
+        for i in df.index:
+            try:
+                smiles = df[smiles][i]
+                m = Chem.MolFromSmiles(smiles)
+            except:
+                removed.append(i)
+                #df.drop(i, inplace=True)
+        df.drop(removed, inplace=True)
+        #df.reset_index(drop=True, inplace=True)
+        return df
 
     def neutralizeRadicals(self,mol):
         for a in mol.GetAtoms():
@@ -594,12 +609,6 @@ class Curation:
             output.append(arr)
         return np.asarray(output)
 
-    class NumpyArrayEncoder(JSONEncoder):
-        def default(self, obj):
-            if isinstance(obj, np.ndarray):
-                return obj.tolist()
-            return JSONEncoder.default(self, obj)
-
     def fp_generation(self,mols, radii, bits):
 
         #generates maccs fp
@@ -624,8 +633,7 @@ class Curation:
                 
                 with open('analysis/fp/fcfp_fp_{}_{}.json'.format(radius, bit), 'w', encoding='utf-8') as f:
                     json.dump(fcfp_fp, f, cls = self.NumpyArrayEncoder)
-
-    #in-house functions
+    
     def metal_atomic_numbers(self,at):
         """ This function checks the atomic number of an atom """
         
@@ -690,17 +698,23 @@ class Curation:
             #save removes wrong smiles
             #mask = df4.iloc[indexDropList_salts]
             #mask.to_csv("{}/error/invalid_smiles.csv".forma), sep=',', header=True, index=False)
-            df4[smiles] = new_smiles
+            df4[curated_smiles] = new_smiles
             return df4
     
     def normalize_groups(self,df4 : pd.DataFrame,smiles=None):
         curated_smiles,smiles = self.is_smiles_passed(smiles)
         mols = []
-        for smi in df4[smiles]:
-            m = Chem.MolFromSmiles(smi,sanitize=True)
-            m2 = rdMolStandardize.Normalize(m)
-            smi = Chem.MolToSmiles(m2,kekuleSmiles=True)
-            mols.append(smi)
+        not_normalized = []
+        for index,smi in enumerate(df4[smiles]):
+            try:
+                m = Chem.MolFromSmiles(smi,sanitize=True)
+                m2 = rdMolStandardize.Normalize(m)
+                smi = Chem.MolToSmiles(m2,kekuleSmiles=True)
+                mols.append(smi)
+            except:
+                not_normalized.append([smi,index])
+        indexes = [i[1] for i in not_normalized]
+        df4.drop(df4.index[indexes],inplace=True)
         df4[curated_smiles] = mols
         #normalized = pd.Series(mols)
         return df4
@@ -730,12 +744,18 @@ class Curation:
         curated_smiles,smiles = self.is_smiles_passed(smiles)
         te = rdMolStandardize.TautomerEnumerator()
         mols = []
+        not_tautomerizable = []
         df5 = df4
-        for smi in df4[smiles]:
-            m = Chem.MolFromSmiles(smi,sanitize=True)
-            m2 = te.Canonicalize(m)
-            smi = Chem.MolToSmiles(m2,kekuleSmiles=True)
-            mols.append(smi)
+        for index,smi in enumerate(df4[smiles]):
+            try:
+                m = Chem.MolFromSmiles(smi,sanitize=True)
+                m2 = te.Canonicalize(m)
+                smi = Chem.MolToSmiles(m2,kekuleSmiles=True)
+                mols.append(smi)
+            except:
+                not_tautomerizable.append([smi,index])
+        indexes = [i[1] for i in not_tautomerizable]
+        df4.drop(df4.index[indexes],inplace=True)
         df4[curated_smiles] = mols
         #canonical = pd.Series(mols)
         # canonical_tautomer = pd.DataFrame(mols, columns=["canonical_tautomer"])
@@ -748,7 +768,7 @@ class Curation:
         mixtureList = []
         indexDropList_mix = []
         df5 = df4
-        for index, smile in enumerate (df4[curated_smiles]):
+        for index, smile in enumerate (df4[smiles]):
             for char in smile:
                 if char == '.': #if a salt was not removed, it will be removed here
                     mixtureList.append(df4.iloc[[index]])
@@ -773,14 +793,14 @@ class Curation:
         mols_noradical = []
         standAlone_salts = []
         indexDropList_salts = []
-        for index, smile in enumerate(df4[curated_smiles]):
+        for index, smile in enumerate(df4[smiles]):
             try:
-                m = Chem.MolFromSmiles(smile, False)
+                m = Chem.MolFromSmiles(smile, sanitize=True)
                 m = rd_inchi.MolToInchi(m)
                 m = Chem.MolFromInchi(m)
                 self.neutralizeRadicals(m)
                 Chem.SanitizeMol(m)
-                mols_noradical.append(Chem.MolToSmiles(m, False))
+                mols_noradical.append(Chem.MolToSmiles(m, kekuleSmiles=True))
             except:
                 indexDropList_salts.append(index)
                 standAlone_salts.append(df4.iloc[[index]])
@@ -813,14 +833,17 @@ class Curation:
         
     def std_routine(self, df4 : pd.DataFrame, smiles=None):
         curated_smiles, smiles = self.is_smiles_passed(smiles)
+        if smiles.find("curated_") == -1:
+            curated_smiles = smiles
         
+        df4 = self.remove_invalid_smiles(df4, smiles)
         df4 = self.remove_Salt_From_DF(df4, smiles)
-        df4 = self.remove_metal(df4, smiles)
-        df4,_ = self.remove_mixture(df4, smiles)
-        df4 = self.normalize_groups(df4,smiles)
-        df4,_ = self.neutralize(df4, smiles)
-        df4,_ = self.canonical_tautomer(df4, smiles)
-        df4,_ = self.standardise(df4, smiles)
+        df4 = self.remove_metal(df4, curated_smiles)
+        df4,_ = self.remove_mixture(df4, curated_smiles)
+        df4 = self.normalize_groups(df4,curated_smiles)
+        df4,_ = self.neutralize(df4, curated_smiles)
+        df4,_ = self.canonical_tautomer(df4, curated_smiles)
+        df4,_ = self.standardise(df4, curated_smiles)
         
         #remove salts second time
         #why cant we just use the function?
@@ -870,5 +893,5 @@ class Curation:
         # dropList = ['SMILES', 'SMILES_no_stereo', 'SMILES_no_salts', 'Stand_smiles', 'SMILES_salts_removed_1', curated_smiles, 'SMILES_salts_removed_2']
         # df4 = df4.drop(columns = dropList)
         df4['ROMol'] = molFromMolBlock
-        df4['SMILES'] = mol2smiles
+        df4[curated_smiles] = mol2smiles
         return df4

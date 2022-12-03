@@ -66,64 +66,6 @@ def app(df,s_state):
                 df.drop(i, inplace=True)
         df.reset_index(drop=True, inplace=True)
         return df
-    # ##################################################################
-    # def remove_metals(df):
-    #     badAtoms = Chem.MolFromSmarts('[!$([#1,#3,#11,#19,#4,#12,#20,#5,#6,#14,#7,#15,#8,#16,#9,#17,#35,#53])]')
-    #     mols = []
-    #     for i in df.index:
-    #         smiles = df[name_smiles][i]
-    #         m = Chem.MolFromSmiles(smiles,)
-    #         if m.HasSubstructMatch(badAtoms):
-    #             df.drop(i, inplace=True)
-    #     df.reset_index(drop=True, inplace=True)
-    #     return df
-    # ##################################################################
-    # def normalize_groups(df):
-    #     mols = []
-    #     for smi in df[name_smiles]:
-    #         m = Chem.MolFromSmiles(smi,sanitize=True,)
-    #         m2 = rdMolStandardize.Normalize(m)
-    #         smi = Chem.MolToSmiles(m2,kekuleSmiles=True)
-    #         mols.append(smi)
-    #     norm = pd.DataFrame(mols, columns=["normalized_smiles"])
-    #     df_normalized = df.join(norm)
-    #     return df_normalized
-    # ##################################################################
-    # def neutralize(df):
-    #     uncharger = rdMolStandardize.Uncharger()
-    #     mols = []
-    #     for smi in df['normalized_smiles']:
-    #         m = Chem.MolFromSmiles(smi,sanitize=True,)
-    #         m2 = uncharger.uncharge(m)
-    #         smi = Chem.MolToSmiles(m2,kekuleSmiles=True)
-    #         mols.append(smi)
-    #     neutral = pd.DataFrame(mols, columns=["neutralized_smiles"])
-    #     df_neutral = df.join(neutral)
-    #     return df_neutral
-    # ##################################################################
-    # def no_mixture(df):
-    #     mols = []
-    #     for smi in df["neutralized_smiles"]:
-    #         m = Chem.MolFromSmiles(smi,sanitize=True,)
-    #         m2 = rdMolStandardize.FragmentParent(m)
-    #         smi = Chem.MolToSmiles(m2,kekuleSmiles=True)
-    #         mols.append(smi)
-    #     no_mixture = pd.DataFrame(mols, columns=["no_mixture_smiles"])
-    #     df_no_mixture = df.join(no_mixture)
-    #     return df_no_mixture
-    # ##################################################################
-    # def canonical_tautomer(df):
-    #     te = rdMolStandardize.TautomerEnumerator()
-    #     mols = []
-    #     for smi in df["no_mixture_smiles"]:
-    #         m = Chem.MolFromSmiles(smi,sanitize=True,)
-    #         m2 = te.Canonicalize(m)
-    #         smi = Chem.MolToSmiles(m2,kekuleSmiles=True)
-    #         mols.append(smi)
-    #     canonical_tautomer = pd.DataFrame(mols, columns=["canonical_tautomer"])
-    #     df_canonical_tautomer = df.join(canonical_tautomer)
-    #     return df_canonical_tautomer
-    # ##################################################################
     # def smi_to_inchikey(df):
     #     inchi = []
     #     for smi in df["canonical_tautomer"]:
@@ -188,109 +130,45 @@ def app(df,s_state):
             cc.AgGrid(df,key = "invalid_smiles_removed")
             #---------------------------------------------------------------------------------#
             # Remove compounds with metals
-            #df = curate.remove_Salt_From_DF(df)
+            df = curate.remove_Salt_From_DF(df, name_smiles)
             df = curate.remove_metal(df, name_smiles)
-            
+            normalized = curate.normalize_groups(df)
+            neutralized,_ = curate.neutralize(normalized,curate.curated_smiles)
+            no_mixture,only_mixture = curate.remove_mixture(neutralized,curate.curated_smiles)
+            canonical_tautomer,_ = curate.canonical_tautomer(no_mixture,curate.curated_smiles)
+            standardized,_ = curate.standardise(canonical_tautomer,curate.curated_smiles)
             #---------------------------------------------------------------------------------#
             # Normalize groups
-
             if options[0] in selected_options:
-
-                st.header('**Normalized Groups**')
-
-                normalized = curate.normalize_groups(df)
-
-                # #Generate Image from original SMILES
-                # PandasTools.AddMoleculeColumnToFrame(normalized, smilesCol = curate.smiles,
-                # molCol = 'Original', includeFingerprints = False)
-                # #Generate Image from normalized SMILES
-                # PandasTools.AddMoleculeColumnToFrame(normalized, smilesCol = curate.curated_smiles,
-                # molCol = 'Normalized', includeFingerprints = False)
-                # # Filter only columns containing images
-                # normalized_fig = normalized.filter(items = ['Original', "Normalized"])
-                #     # Show table for comparing
-                # st.write(normalized_fig.to_html(escape = False), unsafe_allow_html = True)
-            else:
-                normalized = curate.normalize_groups(df)
-                #redundante?
+                cc.img_AgGrid(normalized,title="Normalized Groups",mol_col=name_smiles ,key="normalized_groups")        
             #----------------------------------------------------------------------------------#
             # Neutralize when possible
             if options[1] in selected_options:
 
-                st.header('**Neutralized Groups**')
+                #st.header('**Neutralized Groups**')
                 #if options[0] in selected_options:
-                neutralized, original = curate.neutralize(normalized)
-                cc.img_AgGrid(neutralized,name_smiles,curate.curated_smiles)
-
-                # #Generate Image from normalized SMILES
-                # PandasTools.AddMoleculeColumnToFrame(original, smilesCol = curate.curated_smiles,
-                # molCol = "Normalized", includeFingerprints=False)
-                # #Generate Image from Neutralized SMILES
-                # PandasTools.AddMoleculeColumnToFrame(neutralized, smilesCol = curate.curated_smiles,
-                # molCol = "Neutralized", includeFingerprints = False)
-                # # Filter only columns containing images
-                # neutralized_fig = neutralized.filter(items = ["Normalized", "Neutralized"])
-                # # Show table for comparing
-                # st.write(neutralized_fig.to_html(escape = False), unsafe_allow_html = True)
-            else:
-                neutralized,_ = curate.neutralize(normalized)
-
+                cc.img_AgGrid(neutralized,title="Neutralized Groups",mol_col=curate.curated_smiles,key="neutralized_groups")
             #---------------------------------------------------------------------------------#
             # Remove mixtures and salts
             if options[2] in selected_options:
 
                 st.header('**Remove mixtures**')
                 # if options[1] in selected_options:
-                no_mixture,only_mixture = curate.remove_mixture(neutralized)
-
-                #Generate Image from Neutralized SMILES
-                PandasTools.AddMoleculeColumnToFrame(only_mixture, smilesCol=curate.curated_smiles,
-                molCol="Mixtures", includeFingerprints=False)
-                #Generate Image from No_mixture SMILES
-                # PandasTools.AddMoleculeColumnToFrame(no_mixture, smilesCol="no_mixture_smiles",
-                # molCol="No_mixture", includeFingerprints=False)
-                # Filter only columns containing images
-                no_mixture_fig = only_mixture.filter(items=["Mixtures"])
-                # Show table for comparing
-                st.write(no_mixture_fig.to_html(escape=False), unsafe_allow_html=True)
-            else:
-                no_mixture,_ = curate.remove_mixture(neutralized)
-
+                with st.container():
+                    #st.header("Mixture")
+                    cc.img_AgGrid(only_mixture,title = "Mixture",mol_col=curate.curated_smiles,key="mixture")
+                    #st.header("No mixture")
+                    cc.img_AgGrid(no_mixture,title = "No mixture",mol_col=curate.curated_smiles,key="no_mixture")
             #---------------------------------------------------------------------------------#
             #Generate canonical tautomers
             if options[3] in selected_options:
-
-                st.header('**Generate canonical tautomers**')
-                # if options[2] in selected_options:
-                canonical_tautomer,not_canon = curate.canonical_tautomer(no_mixture)
-
-                # #Generate Image from Neutralized SMILES
-                # PandasTools.AddMoleculeColumnToFrame(not_canon, smilesCol = curate.curated_smiles,
-                # molCol = "No_mixture", includeFingerprints = False)
-                # #Generate Image from No_mixture SMILES
-                # PandasTools.AddMoleculeColumnToFrame(canonical_tautomer, smilesCol=curate.curated_smiles,
-                # molCol = "Canonical_tautomer", includeFingerprints = False)
-                # # Filter only columns containing images
-                # canonical_tautomer_fig = canonical_tautomer.filter(items = ["No_mixture", "Canonical_tautomer"])
-                # # Show table for comparing
-                # st.write(canonical_tautomer_fig.to_html(escape = False), unsafe_allow_html = True)
-            else:
-                canonical_tautomer,_ = curate.canonical_tautomer(no_mixture)
-
+                cc.img_AgGrid(canonical_tautomer,title="Canonical tautomer",mol_col=curate.curated_smiles,key="canonical_tautomer")
+            #---------------------------------------------------------------------------------#
+            # Standardize using Chembl pipeline
             if options[4] in selected_options:
-                st.header('**Standardized**')
-                standardized,not_standardized = curate.standardise(canonical_tautomer)
-                # #Generate Image from Neutralized SMILES
-                # PandasTools.AddMoleculeColumnToFrame(standardized, smilesCol = curate.curated_smiles,
-                # molCol="Standardized", includeFingerprints = False)
-                # PandasTools.AddMoleculeColumnToFrame(not_standardized, smilesCol = curate.curated_smiles,
-                # molCol="Not_Standardized", includeFingerprints = False)
-                # #Generate Image from No_mixture SMILES
-                # standardized_fig = standardized.filter(items = ["Standardized","Not_standardized"])
-                # # Show table for comparing
-                # st.write(standardized_fig.to_html(escape = False), unsafe_allow_html= True)
-            else:
-                standardized = curate.std_routine(canonical_tautomer)
+                cc.img_AgGrid(standardized,title="Chembl Standardization",mol_col=curate.curated_smiles,key="chembl_standardization")
+            
+            #standardized = curate.std_routine(canonical_tautomer,smiles = curate.curated_smiles)
 
             
         ########################################################################################################################################
@@ -308,16 +186,17 @@ def app(df,s_state):
                 st.write("Number of compounds remaining: ",len(df))
                 st.write("Percentage of compounds removed: ",round(dups/len(df)*100,2),"%")
                 st.write("Percentage of compounds remaining: ",round(100-dups/len(df)*100,2),"%")
-                st.header("**Final Dataset**")
-                cc.AgGrid(df,key="final_dataset")
+                #st.header("**Final Dataset**")
+                df.drop_duplicates(subset=curate.curated_smiles,keep="first",inplace=True)
+                cc.img_AgGrid(df,title="Final Dataset",key="final_dataset",mol_col=curate.curated_smiles)
                 filedownload(df,"Final Dataset")
             if radio == data_type[0]:
-                continuous = utils.Continuous_Duplicate_Remover(standardized,curate.smiles,name_activity,False,False)
+                continuous = utils.Continuous_Duplicate_Remover(standardized,curate.curated_smiles,name_activity,False,False)
                 continuous,dups = continuous.remove_duplicates()
                 duplicate_analysis(continuous,dups)
 
             elif radio == data_type[1]:
-                categorical = utils.Classification_Duplicate_Remover(standardized,curate.smiles,name_activity)
+                categorical = utils.Classification_Duplicate_Remover(standardized,curate.curated_smiles,name_activity)
                 categorical,dups = categorical.remove_duplicates()
                 duplicate_analysis(categorical,dups)
 
