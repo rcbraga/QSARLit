@@ -221,9 +221,6 @@ class Custom_Components:
 
             else:
                 st.sidebar.warning("Column previously deleted. Select another column.")
-            #s_state.df = droped
-            #     st.header('**Original input data**')
-            #     self.AgGrid(df=df,Table_title="Original input data")
 
     def delete_column(self,df,key = ""):
         if df is not None:
@@ -777,7 +774,7 @@ class Curation:
 
 
         if len(indexDropList_mix) == 0:
-            return df4,df5
+            return df4,"No mixture"
         else:
             #drop mixtures
             df4.drop(df4.index[indexDropList_mix], inplace = True)
@@ -785,7 +782,7 @@ class Curation:
             df5 = df5.iloc[indexDropList_mix]
             #mixtures = pd.Series(mixtureList)
             #mixtures.to_csv("{}/error/mixtures.csv".forma), sep=',', header=True, index=False)     
-        return df4,df5
+            return df4,df5
     
     def neutralize(self,df4 : pd.DataFrame, smiles=None,):
         curated_smiles, smiles = self.is_smiles_passed(smiles)

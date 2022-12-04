@@ -136,7 +136,7 @@ def app(df,s_state):
             neutralized,_ = curate.neutralize(normalized,curate.curated_smiles)
             no_mixture,only_mixture = curate.remove_mixture(neutralized,curate.curated_smiles)
             canonical_tautomer,_ = curate.canonical_tautomer(no_mixture,curate.curated_smiles)
-            standardized,_ = curate.standardise(canonical_tautomer,curate.curated_smiles)
+            standardized,_= curate.standardise(canonical_tautomer,curate.curated_smiles)
             #---------------------------------------------------------------------------------#
             # Normalize groups
             if options[0] in selected_options:
@@ -156,7 +156,10 @@ def app(df,s_state):
                 # if options[1] in selected_options:
                 with st.container():
                     #st.header("Mixture")
-                    cc.img_AgGrid(only_mixture,title = "Mixture",mol_col=curate.curated_smiles,key="mixture")
+                    if only_mixture=="No mixture":
+                        st.write("**No mixture found**")
+                    else:
+                        cc.img_AgGrid(only_mixture,title = "Mixture",mol_col=curate.curated_smiles,key="mixture")
                     #st.header("No mixture")
                     cc.img_AgGrid(no_mixture,title = "No mixture",mol_col=curate.curated_smiles,key="no_mixture")
             #---------------------------------------------------------------------------------#
