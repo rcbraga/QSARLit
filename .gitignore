@@ -1,5 +1,5 @@
 #ignore .pyc files
 /*.csv
 __pycache__/
-imgs/
+imgs/*.png
 t.py
