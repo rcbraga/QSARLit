@@ -107,7 +107,7 @@ def app(df,s_state):
     if df is not None:
         # Read CSV data
         #f = pd.read_csv(uploaded_file, sep=',')
-        cc.delete_column(df)
+        droped = cc.delete_column(df)
     #     if "updated_df" not in st.session_state:
     #         st.session_state.updated_df = df
     #         index_csv=0

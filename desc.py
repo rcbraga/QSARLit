@@ -43,6 +43,8 @@ from sklearn.preprocessing import StandardScaler
 
 def app(df, s_state):
     cc = utils.Custom_Components()
+    if utils.Commons().CURATED_DF_KEY in s_state:
+        df = s_state[utils.Commons().CURATED_DF_KEY]
     ########################################################################################################################################
     # Functions
     ########################################################################################################################################

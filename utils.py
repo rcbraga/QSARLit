@@ -84,6 +84,7 @@ class Commons:
         pass
     UPDATE_DATAFRAME_KEY = lambda _,string = "": f"update_dataframe-{string}" if string != "" else "update_dataframe"
     DELETE_COL_KEY = lambda _,string = "": f"delete_col-{string}" if string != "" else "delete_col"
+    CURATED_DF_KEY = 'Curated'
 class Custom_Components:
     commons = Commons()
     update_df = commons.UPDATE_DATAFRAME_KEY

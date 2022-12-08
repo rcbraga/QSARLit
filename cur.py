@@ -31,6 +31,7 @@ from rdkit.Chem.MolStandardize import rdMolStandardize
 
 from st_aggrid import AgGrid
 def app(df,s_state):
+    curated_key = utils.Commons().CURATED_DF_KEY
     #custom = cur.Custom_Components()
     ########################################################################################################################################
     # Functions
@@ -196,11 +197,13 @@ def app(df,s_state):
             if radio == data_type[0]:
                 continuous = utils.Continuous_Duplicate_Remover(standardized,curate.curated_smiles,name_activity,False,False)
                 continuous,dups = continuous.remove_duplicates()
+                s_state[curated_key] = continuous
                 duplicate_analysis(continuous,dups)
 
             elif radio == data_type[1]:
                 categorical = utils.Classification_Duplicate_Remover(standardized,curate.curated_smiles,name_activity)
                 categorical,dups = categorical.remove_duplicates()
+                s_state[curated_key] = categorical
                 duplicate_analysis(categorical,dups)
 
     ########################################################################################################################################
