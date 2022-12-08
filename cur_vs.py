@@ -153,10 +153,10 @@ def app(df,s_state):
         # Select columns
         with st.sidebar.header('1. Enter column names'):
             name_smiles = st.sidebar.selectbox('Select column containing SMILES', options=df.columns, key="smiles_column")
-            name_activity = st.sidebar.selectbox(
-                'Select column containing Activity (Active and Inactive should be 1 and 0, respectively or numerical values)', 
-                options=df.columns, key="outcome_column"
-                )
+            # name_activity = st.sidebar.selectbox(
+            #     'Select column containing Activity (Active and Inactive should be 1 and 0, respectively or numerical values)', 
+            #     options=df.columns, key="outcome_column"
+            #     )
             curate = utils.Curation(name_smiles)
         ########################################################################################################################################
         # Sidebar - Select visual inspection
