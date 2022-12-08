@@ -145,11 +145,13 @@ def app(df, s_state):
 
     # Upload File
     if df is not None:
-        cc.delete_column(df,"Delete non descriptor/activity columns")
-    # Select columns
+        #s_state.df = df
+        #deleted = cc.delete_column(df,"Delete non descriptor/activity columns")
+        
+        #select columns
         with st.sidebar.header('2. Enter column with activity'):
             name_activity = st.sidebar.selectbox('Enter column with activity (e.g., Active and Inactive that should be 1 and 0, respectively)', df.columns)
-            if len(name_activity)>0:
+            if len(name_activity) > 0:
                 utils.check_if_name_in_column(df, name_activity)
         st.sidebar.write('---')
 

@@ -3,3 +3,4 @@
 __pycache__/
 #imgs/*.png
 t.py
+*.png

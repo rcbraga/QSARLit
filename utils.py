@@ -33,6 +33,7 @@ from pkgutil import iter_modules
 from io import BytesIO
 from PIL import Image
 
+st.session_state["has_run"] = None
 
 def deploy_chembl():
     import os,subprocess
@@ -79,17 +80,21 @@ def check_if_name_in_column(df: pd.DataFrame, name):
             st.stop()
             #return False
 class Commons:
-    def __init__(self,s_state = None) -> None:
+    def __init__(self) -> None:
         pass
+    UPDATE_DATAFRAME_KEY = lambda _,string = "": f"update_dataframe-{string}" if string != "" else "update_dataframe"
+    DELETE_COL_KEY = lambda _,string = "": f"delete_col-{string}" if string != "" else "delete_col"
 class Custom_Components:
-    
+    commons = Commons()
+    update_df = commons.UPDATE_DATAFRAME_KEY
+    delete_col_key = commons.DELETE_COL_KEY
     def __init__(self) -> None:
         pass
     def AgGrid(self,df,key = None,Table_title="Input data"):
         gd = GridOptionsBuilder.from_dataframe(df)
         gd.configure_pagination(enabled=True)
         gd.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True)
-        gd.configure_selection('multiple', use_checkbox=True)
+        gd.configure_selection('multiple', use_checkbox=False)
         gd = gd.build()
         st.header(f"**{Table_title}**")
         AgGrid(df,key = key,height=500,width=800,gridOptions=gd,columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS)
@@ -139,6 +144,7 @@ class Custom_Components:
                         df = pd.read_csv(uploaded_file)
                     else:
                         df = pd.read_excel(uploaded_file)
+                    #st.session_state["df"] = df
                     if not context:
                         if not key:
                             self.AgGrid(df,key="input"+key)
@@ -206,48 +212,42 @@ class Custom_Components:
         st.header(f"**{title}**")
         AgGrid(df, width = 800,height=500 ,gridOptions = gd, key=f"IMG_{key}" ,allow_unsafe_jscode = True, columns_auto_size_mode = ColumnsAutoSizeMode.FIT_CONTENTS)
 
-    def persist_df_through_deletion(self,df, updated_df_key, col_to_delete_key) -> pd.DataFrame:
+    def persist_df_through_deletion(self,updated_df_key, col_to_delete_key) -> pd.DataFrame:
             # drop column from dataframe
             s_state = st.session_state
             delete_col = s_state[col_to_delete_key]
             if delete_col in s_state[updated_df_key].columns:
-                droped = s_state[updated_df_key].drop(columns=[delete_col])
-                if "input" in s_state:
+                deleted = s_state[updated_df_key].drop(columns=[delete_col])
+                #if "input" in s_state:
                     #s_state.pop("input")
                     #st.header("**Updated input data**") 
-                    st.info("Deleted col "+delete_col)
-                    self.AgGrid(df=droped,Table_title="Updated input data")
-                return droped
+                #st.info("Deleted col "+delete_col)
+                self.AgGrid(df=deleted,Table_title=f"Input without deleted column: {delete_col}")
+                return deleted
 
             else:
-                st.sidebar.warning("Column previously deleted. Select another column.")
-
-    def delete_column(self,df,key = ""):
+                st.warning("Column previously deleted. Select another column.")
+    
+    def delete_column(self,df,key = "") -> pd.DataFrame:
+        
         if df is not None:
-        # Read CSV data
-        #df = pd.read_csv(uploaded_file, sep=',')
-            key = "updated_df"+key
-            if key not in st.session_state:
-                st.session_state[key] = df
-                #sst.header('**Original input data**')
-                #self.AgGrid(df,key="original_df",Table_title="Original input data")
-            
-                #self.AgGrid(df,key="original_df",Table_title="Original input data")
-            #st.subheader(f"{title}")
-            
-            with st.form(key=f"delete_columns{key}",clear_on_submit=True):
-                index = df.columns.tolist().index(
+            key = self.update_df(key)
+            st.session_state[key] = df
+
+            with st.form(key = "Form-"+self.delete_col_key(key),clear_on_submit=False):
+                index = st.session_state[key].columns.tolist().index(
                     st.session_state[key].columns.tolist()[0]
                 )
                 st.selectbox(
-                    "Select column to delete", options=df.columns, index=index, key=f"delete_col{key}"
+                    "Select column to delete", options=st.session_state[key].columns, index=index, key=self.delete_col_key(key)
                 )
                 delete = st.form_submit_button(label="Delete")
             if delete:
                 #st.write(st.session_state)
-                with st.container():
-                    droped = self.persist_df_through_deletion(df,key,f"delete_col{key}")
-                    #st.session_state["df"] = droped
+                deleted = self.persist_df_through_deletion(key,self.delete_col_key(key))
+                st.session_state["has_run"] = deleted
+                return deleted 
+                
     def ReadPictureFiles(self,wch_fl) -> base64:
         try:
             return base64.b64encode(open(wch_fl, 'rb').read()).decode()
