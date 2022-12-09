@@ -72,27 +72,11 @@ else:
             if "has_run" in s_state and s_state.has_run is not None:
                 st.warning("To add a new file please refresh the app")
                 s_state.df = cc.upload_file(custom_title="Upload your dataset for modeling")
-                #s_state.df = cc.delete_column(s_state.has_run,s_title)
-                
-                # df = st.file_uploader("**Upload your dataset for modeling**",type=['csv','xlsx'])
-                # if df is not None:
-                #     df =  pd.read_csv(df)
-                #     s_state.df = df
-                #s_state.df = cc.delete_column(s_state.has_run,s_title)        
-                #cc.AgGrid(s_state.df)
+
                 s_state.df = cc.delete_column(s_state.has_run,s_title)
                 #app.run(s_state.df,s_state)
                 app.run(s_state.df,s_state)
-            # if "has_run" in s_state and s_state.has_run is not None:
-            #     with st.expander("Upload another file"):
-            #         upload = st.button("Input another file",key="run_again")
-            #         if upload:
-            #             df = cc.upload_file(custom_title="Upload your dataset for modeling")
-            #     #s_state.df = cc.delete_column(s_state.has_run,s_title)        
-            #     cc.AgGrid(s_state.has_run)
-            #     s_state.df = cc.delete_column(s_state.has_run,s_title)
-            #     #app.run(s_state.df,s_state)
-            #     app.run(s_state.df,s_state)
+
             else:
                 s_state.df = cc.upload_file(custom_title="Upload your dataset for modeling")
                 s_state.df = cc.delete_column(s_state.df,s_title)

@@ -225,7 +225,7 @@ def app(df,s_state):
     # Probability Threshold
     ########################################################################################################################################
     #repeated code
-    with st.sidebar.header('4. Probability Threshold'):
+    with st.sidebar.header('1. Probability Threshold'):
         prob_treshold = st.sidebar.number_input('Enter the Probability Threshold', min_value=None, max_value=None, value=float(0.5))
 
     ########################################################################################################################################
@@ -233,7 +233,7 @@ def app(df,s_state):
     ########################################################################################################################################
     # Upload File
     #repeated code
-    with st.sidebar.header('5. Upload your model'):
+    with st.sidebar.header('2. Upload your model'):
         model_file = st.sidebar.file_uploader("Upload your model in PKL file", type=["pkl"], key="up_model_VS")
     
     with st.sidebar.expander("Whats a PKL file"):

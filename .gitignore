@@ -2,5 +2,6 @@
 /*.csv
 __pycache__/
 #imgs/*.png
+outa.txt
 t.py
 *.png

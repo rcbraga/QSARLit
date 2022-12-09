@@ -234,20 +234,34 @@ class Custom_Components:
         if df is not None:
             key = self.update_df(key)
             st.session_state[key] = df
-
+            st.write("Delete columns unrelated to descriptors outcome values")
             with st.form(key = "Form-"+self.delete_col_key(key),clear_on_submit=False):
                 index = st.session_state[key].columns.tolist().index(
                     st.session_state[key].columns.tolist()[0]
                 )
                 st.selectbox(
-                    "Select column to delete", options=st.session_state[key].columns, index=index, key=self.delete_col_key(key)
+                    "Select columns to delete", options=st.session_state[key].columns, index=index, key=self.delete_col_key(key)
                 )
-                delete = st.form_submit_button(label="Delete")
+                col1, col_f ,col2 = st.columns([2,2,0.92],gap="large")
+                with col1:
+                    delete = st.form_submit_button(label="Delete")
+                with col_f:
+                    undo = st.form_submit_button(label="Undo")
+                with col2:
+                    proceed = st.form_submit_button("Proceed")
             if delete:
-                #st.write(st.session_state)
                 deleted = self.persist_df_through_deletion(key,self.delete_col_key(key))
                 st.session_state["has_run"] = deleted
-                return deleted 
+                return deleted
+            if undo:
+                st.session_state[key] = df
+                st.session_state["has_run"] = None
+                self.AgGrid(df,Table_title="Input")
+                return df
+            if proceed and st.session_state["has_run"] is not None:
+                return st.session_state["has_run"]
+            if proceed and st.session_state["has_run"] is None:
+                return st.session_state[key]
                 
     def ReadPictureFiles(self,wch_fl) -> base64:
         try:
