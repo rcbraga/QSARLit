@@ -82,7 +82,7 @@ def app(df,s_state):
         
         # Select columns
         with st.sidebar.header('2. Enter column name in modeling set'):
-            name_activity = st.sidebar.text_input('Enter column with activity (e.g., Active and Inactive that should be 1 and 0, respectively)', 'Outcome')
+            name_activity = st.sidebar.selectbox('Enter column with activity (e.g., Active and Inactive that should be 1 and 0, respectively)', options = df.columns)
             if utils.check_if_name_in_column(df, name_activity):
                 pass
             else:
@@ -128,7 +128,7 @@ def app(df,s_state):
             if own_external is not None:
             
                 with st.sidebar.header('4.3 Enter column name'):
-                    name_activity_ext = st.sidebar.text_input('Enter column with activity in externl set (e.g., Active and Inactive that should be 1 and 0, respectively)', 'Outcome')
+                    name_activity_ext = st.sidebar.selectbox('Enter column with activity in externl set (e.g., Active and Inactive that should be 1 and 0, respectively)', options=df.columns)
 
                 st.sidebar.write('---')
 
