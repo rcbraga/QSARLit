@@ -16,7 +16,7 @@ def app(_,s_state):
     and interpret the predictions with probability maps for computational toxicology and drug discovery projects.
 
     **Credits**
-    - App built in `Python` + `Streamlit` by [José Teófilo Moreira Filho](http://lattes.cnpq.br/3464351249761623), Henric P. V. Gil, Rodolpho C. Braga, Vinicius M. Alves , Bruno J. Neves, and Carolina H. Andrade.
+    - App built in `Python` + `Streamlit` by [José Teófilo Moreira Filho & Henric P. V. Gil](http://lattes.cnpq.br/3464351249761623), , Rodolpho C. Braga, Vinicius M. Alves , Bruno J. Neves, and Carolina H. Andrade.
     - Plese follow our research:
         [Lattes](http://lattes.cnpq.br/3464351249761623),
         [ResearchGate](https://www.researchgate.net/profile/Jose-Teofilo-Filho),
