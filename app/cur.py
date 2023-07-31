@@ -145,7 +145,7 @@ def app(df,s_state):
             #----------------------------------------------------------------------------------#
             # Neutralize when possible
             if options[1] in selected_options:
-
+ 
                 #st.header('**Neutralized Groups**')
                 #if options[0] in selected_options:
                 cc.img_AgGrid(neutralized,title="Neutralized Groups",mol_col=curate.curated_smiles,key="neutralized_groups")

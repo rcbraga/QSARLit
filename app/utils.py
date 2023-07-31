@@ -89,8 +89,10 @@ class Custom_Components:
     commons = Commons()
     update_df = commons.UPDATE_DATAFRAME_KEY
     delete_col_key = commons.DELETE_COL_KEY
-    def __init__(self) -> None:
+
+    def __init__(self):
         pass
+    
     def AgGrid(self,df,key = None,Table_title="Input data"):
         gd = GridOptionsBuilder.from_dataframe(df)
         gd.configure_pagination(enabled=True)
@@ -120,47 +122,47 @@ class Custom_Components:
         else:
             MAX = c.number_input(f"Maximum {label}",step = step,min_value = st.session_state[key[0]]+1,max_value = max_value, key = key[1])
             return MIN,MAX
-    
-    def upload_file(self,custom_title = "Upload file",context:st=None,file_type = "csv",key = "")->pd.DataFrame:
-        if st.session_state["title"]["title"] != "Home":
-            
-            if not context:
-                st.subheader(f"{custom_title}")
-                uploaded_file = st.file_uploader("Choose a file", type=["csv","xlsx"],key = "uploader"+key)
-                
-                st.markdown("""
+
+    # Add the upload_file method to the Custom_Components class
+    def upload_file(self, custom_title="Upload file", context: st = None, file_type="csv", key="") -> pd.DataFrame:
+        if not context:
+            st.subheader(f"{custom_title}")
+            uploaded_file = st.file_uploader("Choose a file", type=["csv", "xlsx"], key="uploader" + key)
+
+            st.markdown(
+                """
                 [Example CSV input file](https://github.com/joseteofilo/data_qsarlit/blob/master/example_modeling_dataset_for_curation.csv)
-                    """)
-            else:
-                context.subheader(f"{custom_title}")
-                uploaded_file = context.file_uploader("Choose a file", type=["csv","xlsx"],key = "uploader"+"_"+key)
-                
-                context.markdown("""
-                [Example CSV input file](https://github.com/joseteofilo/data_qsarlit/blob/master/example_modeling_dataset_for_curation.csv)
-                """)
-                
-            if uploaded_file is not None:
-                try:
-                    if uploaded_file.name.endswith('.csv'):
-                        df = pd.read_csv(uploaded_file)
-                    else:
-                        df = pd.read_excel(uploaded_file)
-                    #st.session_state["df"] = df
-                    if not context:
-                        if not key:
-                            self.AgGrid(df,key="input"+key)
-                        else:
-                            self.AgGrid(df,key="input"+"_"+key)
-                    return df
-                except Exception as e:
-                    st.error("Error reading file. Please try again.")
-                    st.error(e)
-            elif not context and uploaded_file is None:
-                st.info("Please upload a file.")
-            elif context and uploaded_file is None:
-                context.info("Please upload a file.")
+            """
+            )
         else:
-            return None
+            context.subheader(f"{custom_title}")
+            uploaded_file = context.file_uploader("Choose a file", type=["csv", "xlsx"], key="uploader" + "_" + key)
+
+            context.markdown(
+                """
+                [Example CSV input file](https://github.com/joseteofilo/data_qsarlit/blob/master/example_modeling_dataset_for_curation.csv)
+            """
+            )
+
+        if uploaded_file is not None:
+            try:
+                if uploaded_file.name.endswith('.csv'):
+                    df = pd.read_csv(uploaded_file)
+                else:
+                    df = pd.read_excel(uploaded_file)
+                if not context:
+                    if not key:
+                        self.AgGrid(df, key="input" + key)
+                    else:
+                        self.AgGrid(df, key="input" + "_" + key)
+                return df
+            except Exception as e:
+                st.error("Error reading file. Please try again.")
+                st.error(e)
+        elif not context and uploaded_file is None:
+            st.info("Please upload a file.")
+        elif context and uploaded_file is None:
+            context.info("Please upload a file.")
 
     def img_tag_generator(self,imgs: list[Image.Image]):
         #BytesIOObj = BytesIO()
