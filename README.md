@@ -2,28 +2,33 @@
 
 ![Python 3.8](https://img.shields.io/badge/python-3.8-blue) ![Python 3.9](https://img.shields.io/badge/python-3.9-blue) ![Python 3.10](https://img.shields.io/badge/python-3.10-blue) ![Docker](https://img.shields.io/badge/docker-supported-brightgreen)
 
-## Testar e Implementar
+## Test and Deploy
 
-Para testar e implementar o projeto, siga as etapas abaixo:
+To test and deploy the project, follow the steps below:
 
-1. Clone o repositório Git para o seu computador local.
-2. Certifique-se de que você tenha o Docker e o Docker Compose instalados.
-3. No terminal, navegue até a pasta raiz do projeto.
-4. Para iniciar o servidor em modo de depuração, execute os seguintes comandos:
+1. Clone the Git repository to your local computer.
+2. Make sure you have Docker and Docker Compose installed.
+3. In the terminal, navigate to the project's root folder.
+4. To start the server in debug mode, execute the following commands:
 
    ```
    docker compose up --build debugger
    docker compose up debugger
    ```
-5. Para iniciar o servidor em modo de produção, execute os seguintes comandos:
+
+5. To start the server in production mode, execute the following commands:
 
    ```
    docker compose up --build production
    docker compose up production
    ```
 
-Os comandos acima irão construir e iniciar o contêiner Docker para a aplicação.
+The above commands will build and start the Docker container for the application.
+
+The application will be exposed at `localhost:8501`.
 
 ```console
 docker exec -it qsartlit-app bash
 ```
+
+Make sure to access the application in your browser using the address `localhost:8501`.
