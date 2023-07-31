@@ -3,7 +3,7 @@ from PIL import Image
 
 def app(_,s_state):
     #s_state.title = 'Home'
-    st.image('./LOGO-QSAR-lit.tif')
+    st.image('./app/LOGO-QSAR-lit.tif')
     
     st.markdown("""
     <style>
