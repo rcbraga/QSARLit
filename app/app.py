@@ -37,21 +37,21 @@ if 'title' not in s_state:
         s_state.df = None
         app.run(None, s_state)
     elif s_title in not_modeling:
-        s_state.df = cc.upload_file(custom_title="Upload your dataset for modeling", context=st)
+        s_state.df = cc.upload_file(custom_title="Upload your dataset for modeling")
         app.run(s_state.df, s_state)
     else:
         if "has_run" in s_state and s_state.has_run is not None:
             with st.expander("Upload another file"):
                 upload = st.button("Input another file", key="run_again")
                 if upload:
-                    df = cc.upload_file(custom_title="Upload your dataset for modeling", context=st)
+                    df = cc.upload_file(custom_title="Upload your dataset for modeling")
                     if df is not None:
                         s_state.df = df
                     cc.AgGrid(s_state.df)
                     s_state.df = cc.delete_column(s_state.has_run, s_title)
                     app.run(s_state.df, s_state)
         else:
-            s_state.df = cc.upload_file(custom_title="Upload your dataset for modeling", context=st)
+            s_state.df = cc.upload_file(custom_title="Upload your dataset for modeling")
             s_state.df = cc.delete_column(s_state.df, s_title)
             app.run(s_state.df, s_state)
 
@@ -61,15 +61,15 @@ else:
         s_state.df = None
         app.run(None, s_state)
     elif s_title in not_modeling:
-        s_state.df = cc.upload_file()
+        s_state.df = cc.upload_file(context=st)
         app.run(s_state.df, s_state)
     else:
         if "has_run" in s_state and s_state.has_run is not None:
             st.warning("To add a new file please refresh the app")
-            s_state.df = cc.upload_file(custom_title="Upload your dataset for modeling", context=st)
+            s_state.df = cc.upload_file(context=st)
             s_state.df = cc.delete_column(s_state.has_run, s_title)
             app.run(s_state.df, s_state)
         else:
-            s_state.df = cc.upload_file(custom_title="Upload your dataset for modeling", context=st)
+            s_state.df = cc.upload_file(context=st)
             s_state.df = cc.delete_column(s_state.df, s_title)
             app.run(s_state.df, s_state)

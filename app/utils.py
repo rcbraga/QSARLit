@@ -124,48 +124,42 @@ class Custom_Components:
             return MIN,MAX
 
     # Add the upload_file method to the Custom_Components class
-    def upload_file(self, custom_title="Upload file", context: st = None, file_type="csv", key="") -> pd.DataFrame:
-        if not context:
+    def upload_file(self, custom_title="Upload file", context: st = None, file_type="csv", key="")-> pd.DataFrame:
+        if context is None:
             st.subheader(f"{custom_title}")
             uploaded_file = st.file_uploader("Choose a file", type=["csv", "xlsx"], key="uploader" + key)
-            if uploaded_file is not None:
-                try:
-                    if uploaded_file.name.endswith('.csv'):
-                        df = pd.read_csv(uploaded_file)
-                    else:
-                        df = pd.read_excel(uploaded_file)
-                    # st.session_state["df"] = df
-                    if not context:
-                        if not key:
-                            self.AgGrid(df, key="input" + key)
-                        else:
-                            self.AgGrid(df, key="input" + "_" + key)
-                    return df
-                except Exception as e:
-                    st.error("Error reading file. Please try again.")
-                    st.error(e)
-                    return None
+
+            st.markdown("""
+            [Example CSV input file](https://github.com/joseteofilo/data_qsarlit/blob/master/example_modeling_dataset_for_curation.csv)
+            """)
         else:
             context.subheader(f"{custom_title}")
             uploaded_file = context.file_uploader("Choose a file", type=["csv", "xlsx"], key="uploader" + "_" + key)
-            if uploaded_file is not None:
-                try:
-                    if uploaded_file.name.endswith('.csv'):
-                        df = pd.read_csv(uploaded_file)
+
+            context.markdown("""
+            [Example CSV input file](https://github.com/joseteofilo/data_qsarlit/blob/master/example_modeling_dataset_for_curation.csv)
+            """)
+
+        if uploaded_file is not None:
+            try:
+                if uploaded_file.name.endswith('.csv'):
+                    df = pd.read_csv(uploaded_file)
+                else:
+                    df = pd.read_excel(uploaded_file)
+
+                if not context:
+                    if not key:
+                        self.AgGrid(df, key="input" + key)
                     else:
-                        df = pd.read_excel(uploaded_file)
-                    # st.session_state["df"] = df
-                    if not context:
-                        if not key:
-                            self.AgGrid(df, key="input" + key)
-                        else:
-                            self.AgGrid(df, key="input" + "_" + key)
-                    return df
-                except Exception as e:
-                    context.error("Error reading file. Please try again.")
-                    context.error(e)
-                    return None
-        return None
+                        self.AgGrid(df, key="input" + "_" + key)
+                return df
+            except Exception as e:
+                st.error("Error reading file. Please try again.")
+                st.error(e)
+        elif not context and uploaded_file is None:
+            st.info("Please upload a file.")
+        elif context and uploaded_file is None:
+            context.info("Please upload a file.")
 
     def img_tag_generator(self,imgs: list[Image.Image]):
         #BytesIOObj = BytesIO()
