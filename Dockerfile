@@ -59,12 +59,9 @@ ENV PYTHONPATH "${PYTHONPATH}:/usr/bin/python3.9"
 # Install ptvsd for debugging
 RUN python3.9 -m pip install --no-cache-dir  debugpy
 
-# Expose ports 4600, 4601, and 4602
+# Expose ports 5678 and 8501
 EXPOSE 5678
-EXPOSE 4600
-EXPOSE 4601
-EXPOSE 4602
+EXPOSE 8501
 
-# Start the Flask application with debugpy for debugging
-# Comando para iniciar o servidor Flask com debugpy
-CMD python3.9 -m debugpy --listen 0.0.0.0:5678 --wait-for-client -m flask run -h 0.0.0.0 -p 4600
+# Start Streamlit app with debugpy for debugging
+CMD python3.9 -m debugpy --listen 0.0.0.0:5678 --wait-for-client -m streamlit run app.py --server.port 8501

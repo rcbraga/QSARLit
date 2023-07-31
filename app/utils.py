@@ -1,5 +1,6 @@
 from dis import disco
 from os import remove
+import os
 #from tkinter.tix import InputOnly
 from unicodedata import normalize
 from xmlrpc.client import Boolean
@@ -161,15 +162,18 @@ class Custom_Components:
         elif context and uploaded_file is None:
             context.info("Please upload a file.")
 
-    def img_tag_generator(self,imgs: list[Image.Image]):
-        #BytesIOObj = BytesIO()
+
+    def img_tag_generator(self, imgs: list[Image.Image]):
+        # Cria o diretório "imgs" se ele não existir
+        if not os.path.exists("./imgs"):
+            os.makedirs("./imgs")
+
         img_tag = []
-        for i,img in enumerate(imgs):
-            #img.save(BytesIOObj, format='PNG')
+        for i, img in enumerate(imgs):
             img.save(f'./imgs/temp_{i}.png', format='PNG')
-            img_str = base64.b64encode(open(f"./imgs/temp_{i}.png","rb").read()).decode('utf-8')
+            img_str = base64.b64encode(open(f"./imgs/temp_{i}.png", "rb").read()).decode('utf-8')
             img_tag.append(f"data:image/png;base64,{img_str}")
-            
+
         return img_tag
 
     def img_AgGrid(self,df,mol_col,title = "Input",key = None):
